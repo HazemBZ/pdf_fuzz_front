@@ -1,8 +1,8 @@
 import {AppBar, Toolbar, Typography} from '@mui/material'
 
-const NavBar = () => {
+const NavBar = ({position,highlighted}) => {
     return (
-        <AppBar position="static">
+        <AppBar position={position} style={{display: highlighted?'none':'flex'}}>
             <Toolbar>
                 <Typography variant="subtitle1">
                     Header
