@@ -2,37 +2,49 @@ import NavBar from "./components/NavBar";
 import SearchInput from "./components/SearchInput";
 import axios from "axios";
 import { withStyles } from "@mui/styles";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import PagesGallery from "./components/PagesGallery";
-import { Box, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
+import HighlightWindow from "./components/HighlightWindow";
+import FilesSelector from "./components/FilesSelector";
+import styles from './styles.module.css'
 
 const App = ({ classes }) => {
-  const [names, setNames] = useState([]);
-  const [selected, setSelected] = useState(""); // selected files
+  const [metas, setMetas] = useState([]);
+  const [selected, setSelected] = useState([]);
   const [searchWord, setSearchWord] = useState("");
-  const [items, setItems] = useState([]); // image items
-  const [loading, setLoading] = useState(false)
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
   const [highlightedItem, setHighlightedItem] = useState({});
 
-  const fetchNames = async () => {
+  const fetchFilesMeta = async () => {
     const response = await axios.get(
       "http://localhost:8000/api/fuzz/file/names"
     );
     const data = await response.data;
-    console.log(data);
-    setNames(data);
+    setMetas(data);
   };
 
-  const fetchMatchImages = async (cb) => {
-    setLoading(true)
-    const response = await axios.post(
-      "http://localhost:8000/api/fuzz/image/by/keyword",
-      { files: selected, keyword: searchWord }
-    );
-    const data = response.data;
-    cb(data);
-    setLoading(false)
+  const fetchMatchImages = useCallback(
+    async (cb) => {
+      setLoading(true);
+      const files = metas
+        .filter((meta) => selected.includes(meta.name))
+        .map((m) => m.path);
+      const response = await axios.post(
+        "http://localhost:8000/api/fuzz/image/by/keyword",
+        { files, keyword: searchWord }
+      );
+      const data = response.data;
+      cb(data);
+      setLoading(false);
+    },
+    [metas, searchWord, selected]
+  );
+
+  const highlightItem = (item) => {
+    setHighlighted(true);
+    setHighlightedItem(item);
   };
 
   const handleItemSelection = (item) => {
@@ -43,43 +55,9 @@ const App = ({ classes }) => {
     }
   };
 
-
-
-  const FileList2 = (Names) => {
-    const [checked, setChecked] = useState(Array(Names.length).fill(false));
-    const handleChange = (event, name) => {
-      const id = event.target.id;
-      setChecked((old) => {
-        let new_a = [...old];
-        new_a[id] = !new_a[id];
-        return new_a;
-      });
-      handleItemSelection(name);
-    };
-    return (
-      <FormGroup style={{ padding: 50 }}>
-        {Names.map((name, c) => (
-          <FormControlLabel
-            id={c}
-            key={name + c}
-            control={
-              <Checkbox
-                checked={checked[c]}
-                onChange={(e) => handleChange(e, name)}
-              />
-            }
-            label={name}
-          />
-        ))}
-      </FormGroup>
-    );
-  };
-
   const onSearchClick = (el) => {
-    console.log(`searching for ${searchWord} in ${selected}`);
     setItems([]);
     fetchMatchImages((data) => {
-      console.log(data);
       data.forEach(({ file, keyword, matchedImages }) => {
         matchedImages.forEach((image) => {
           setItems((oldItems) => [
@@ -89,59 +67,37 @@ const App = ({ classes }) => {
         });
       });
     });
-    
   };
 
-  const Highlight = () => {
-    return (
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          zIndex: "10",
-          margin: 0,
-          display: highlighted ? "flex" : "none",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "grey",
-        }}
-        onClick={() => setHighlighted(false)}
-      >
-        <div onClick={(e) => e.stopPropagation()}>
-          <img src={highlightedItem.img} height="800" />
-        </div>
-      </div>
-    );
-  };
 
-  const highlightItem = (item) => {
-    setHighlighted(true);
-    setHighlightedItem(item);
-  };
+
 
   useEffect(() => {
-    fetchNames();
+    fetchFilesMeta();
   }, []);
+
   return (
-    <div style={{ height: "100%", backgroundColor: "white" }}>
+    <div className={styles.appWrapper}>
       <NavBar position="static" highlighted={highlighted} />
-      <Highlight />
-      <div style={{ display: "flex", flexDirection: "row", height: "100%" }}>
-        {/* <div style={{ , flexDirection: "row", height:"100%" }}> */}
-        <div style={{ height: "100%", margin: "50px" }}>
-          {names ? FileList2(names) : "Loading ..."}
+      <HighlightWindow
+        highlighted={highlighted}
+        setHighlighted={setHighlighted}
+        highlightedItem={highlightedItem}
+      />
+      <div className={styles.tools}>
+        <div className={styles.fileSelector} >
+          {metas ? (
+            <FilesSelector
+              metas={metas}
+              handleItemSelection={handleItemSelection}
+
+            />
+          ) : (
+            <p>Loading ...</p>
+          )}
         </div>
         <div
-          style={{
-            width: "80%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "space-around",
-            marginTop: "0px",
-          }}
+          className={styles.galleryContainer}
         >
           <SearchInput
             onChange={(e) => setSearchWord(e.target.value)}
@@ -149,7 +105,11 @@ const App = ({ classes }) => {
             searchClick={onSearchClick}
           />
           {items ? (
-            <PagesGallery loading={loading} items={items} itemClick={highlightItem} />
+            <PagesGallery
+              loading={loading}
+              items={items}
+              itemClick={highlightItem}
+            />
           ) : (
             ""
           )}
@@ -159,7 +119,7 @@ const App = ({ classes }) => {
   );
 };
 
-const styles = {
+const muiStyles = {
   buttonGroupLayout: {
     display: "flex",
     justifyContent: "center",
@@ -172,4 +132,4 @@ const styles = {
   },
 };
 
-export default withStyles(styles)(App);
+export default withStyles(muiStyles)(App);
