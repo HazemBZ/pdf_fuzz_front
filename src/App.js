@@ -1,12 +1,13 @@
-import NavBar from "./components/NavBar";
-import SearchInput from "./components/SearchInput";
-import axios from "axios";
 import { withStyles } from "@mui/styles";
-import { useEffect, useState, useCallback } from "react";
-import PagesGallery from "./components/PagesGallery";
-import HighlightWindow from "./components/HighlightWindow";
+import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 import FilesSelector from "./components/FilesSelector";
-import styles from './styles.module.css'
+import HighlightWindow from "./components/HighlightWindow";
+import NavBar from "./components/NavBar";
+import PagesGallery from "./components/PagesGallery";
+import SearchInput from "./components/SearchInput";
+import styles from "./styles.module.css";
+import { targetServer } from "settings";
 
 const App = ({ classes }) => {
   const [metas, setMetas] = useState([]);
@@ -19,7 +20,7 @@ const App = ({ classes }) => {
 
   const fetchFilesMeta = async () => {
     const response = await axios.get(
-      "http://localhost:8000/api/fuzz/file/names"
+      `http://${targetServer}/api/fuzz/file/names`
     );
     const data = await response.data;
     setMetas(data);
@@ -32,7 +33,8 @@ const App = ({ classes }) => {
         .filter((meta) => selected.includes(meta.name))
         .map((m) => m.path);
       const response = await axios.post(
-        "http://localhost:8000/api/fuzz/image/by/keyword",
+        `http://${targetServer}/api/fuzz/image/by/keyword`,
+
         { files, keyword: searchWord }
       );
       const data = response.data;
@@ -55,22 +57,17 @@ const App = ({ classes }) => {
     }
   };
 
-  const onSearchClick = (el) => {
-    setItems([]);
+  const onSearchClick = async (el) => {
     fetchMatchImages((data) => {
-      data.forEach(({ file, keyword, matchedImages }) => {
-        matchedImages.forEach((image) => {
-          setItems((oldItems) => [
-            ...oldItems,
-            { img: image, title: `${file}_${keyword}` },
-          ]);
-        });
-      });
+      const newItems = data.flatMap(({ file, keyword, matchedImages }) =>
+        matchedImages.map((matchImage) => ({
+          img: matchImage,
+          title: `${file}_${keyword}`,
+        }))
+      );
+      setItems(newItems);
     });
   };
-
-
-
 
   useEffect(() => {
     fetchFilesMeta();
@@ -79,26 +76,25 @@ const App = ({ classes }) => {
   return (
     <div className={styles.appWrapper}>
       <NavBar position="static" highlighted={highlighted} />
-      <HighlightWindow
-        highlighted={highlighted}
-        setHighlighted={setHighlighted}
-        highlightedItem={highlightedItem}
-      />
+      {highlighted && (
+        <HighlightWindow
+          highlighted={highlighted}
+          setHighlighted={setHighlighted}
+          highlightedItem={highlightedItem}
+        />
+      )}
       <div className={styles.tools}>
-        <div className={styles.fileSelector} >
+        <div className={styles.fileSelector}>
           {metas ? (
             <FilesSelector
               metas={metas}
               handleItemSelection={handleItemSelection}
-
             />
           ) : (
             <p>Loading ...</p>
           )}
         </div>
-        <div
-          className={styles.galleryContainer}
-        >
+        <div className={styles.galleryContainer}>
           <SearchInput
             onChange={(e) => setSearchWord(e.target.value)}
             wordValue={searchWord}
