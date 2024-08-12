@@ -45,8 +45,8 @@ const App = ({ classes }) => {
   );
 
   const highlightItem = (item) => {
-    setHighlighted(true);
     setHighlightedItem(item);
+    setHighlighted(true);
   };
 
   const handleItemSelection = (item) => {
@@ -62,7 +62,7 @@ const App = ({ classes }) => {
       const newItems = data.flatMap(({ file, keyword, matchedImages }) =>
         matchedImages.map((matchImage) => ({
           img: matchImage,
-          title: `${file}_${keyword}`,
+          title: `${file}`,
         }))
       );
       setItems(newItems);
