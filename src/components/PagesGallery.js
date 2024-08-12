@@ -9,49 +9,57 @@ import {
 import InfoIcon from "@mui/icons-material/Info";
 import { useMemo } from "react";
 import styles from "styles.module.css";
+import { targetServer } from "settings";
 
 const PagesGallery = ({ itemClick, items, loading }) => {
   const matches = useMemo(() => items.length, [items]);
 
   const LoadedItems = () => {
     if (matches === 0) return <h1>🧐 Nothing found</h1>;
+    return items
+      .map((item) => ({ ...item, title: item.title.replace("assets/", "") }))
+      .map((item, i) => {
+        const imageLocation = `http://${targetServer}/api/fuzz/image/path/${item.img}`;
 
-    return items.map((item, i) => (
-      <ImageListItem
-        key={i}
-        style={{
-          border: "2px solid black",
-          overflow: "clip",
-          transition: "0.2s",
-          "&:hover": {
-            transform: "scale(1.1)",
-            width: "400px",
-          },
-        }}
-        onClick={() => itemClick(item)}
-      >
-        <img
-          src={item.img + "?w=164&h=164&fit=crop&auto=format"}
-          srcSet={item.img + "?w=164&h=164&fit=crop&auto=format@dpr=2 x2"}
-          alt={item.title}
-          loading="lazy"
-          width="100%"
-          height="100%"
-        />
-        <ImageListItemBar
-          title={item.title}
-          // subtitle={"subtitle"}
-          actionIcon={
-            <IconButton
-              sx={{ color: "rgba(255, 255, 255, 0.54)" }}
-              aria-label={`info about ${item.title}`}
-            >
-              <InfoIcon />
-            </IconButton>
-          }
-        />
-      </ImageListItem>
-    ));
+        return (
+          <ImageListItem
+            className={styles.imageBar}
+            title={item.title}
+            key={i}
+            onClick={() => itemClick(imageLocation)}
+          >
+            <img
+              src={imageLocation + "?w=164&h=164&fit=crop&auto=format"}
+              srcSet={
+                imageLocation + "?w=164&h=164&fit=crop&auto=format@dpr=2 x2"
+              }
+              alt={item.title}
+              loading="lazy"
+              width="100%"
+              height="100%"
+            />
+            <ImageListItemBar
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundSize: "100% 100%",
+                backgroundPosition: "0px 0px",
+                backgroundImage:
+                  "linear-gradient(90deg, rgb(70, 65, 93) 0%, rgba(19, 31, 39, 0.52) 100%)",
+              }}
+              title={item.title}
+              sx={{ height: 25 }}
+              actionIcon={
+                <IconButton
+                  sx={{ color: "rgba(255, 255, 255, 0.54)" }}
+                  aria-label={`info about ${item.title}`}
+                >
+                  <InfoIcon />
+                </IconButton>
+              }
+            />
+          </ImageListItem>
+        );
+      });
   };
 
   return (
