@@ -35,15 +35,13 @@
   margin: 50px;
 }
 
-
-
 /*
  * ==============================================
  * Dot Flashing
  * Credits: https://codepen.io/nzbin/pen/GGrXbp
  * ==============================================
  */
- .dot-flashing {
+.dot-flashing {
   position: relative;
   width: 10px;
   height: 10px;
@@ -53,7 +51,8 @@
   animation: dot-flashing 1s infinite linear alternate;
   animation-delay: 0.5s;
 }
-.dot-flashing::before, .dot-flashing::after {
+.dot-flashing::before,
+.dot-flashing::after {
   content: "";
   display: inline-block;
   position: absolute;
@@ -84,8 +83,21 @@
   0% {
     background-color: #9880ff;
   }
-  50%, 100% {
+  50%,
+  100% {
     background-color: rgba(152, 128, 255, 0.2);
   }
 }
 
+.imageBar {
+  border: 2px solid black;
+  overflow: clip;
+
+  img {
+    transform: scale(1);
+    transition: transform 0.2s ease-in-out;
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
