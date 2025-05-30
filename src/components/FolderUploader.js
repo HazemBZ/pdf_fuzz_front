@@ -1,12 +1,7 @@
-// import { faSpinner } from "@fortawesome/free-solid-svg-icons";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import Modal, { useModal, UseModalHook } from "components/Modal";
-// import Space from "components/Space";
-import { useContext, useMemo, useRef, useState } from "react";
-// import style from "./path-sink.module.scss";
+import { useMemo, useRef, useState } from "react";
 import { chunkUploadFiles, filterNonUploaded } from "helpers/uploadHelpers";
 import { Button } from "@mui/material";
-import { UploadFile } from "@mui/icons-material";
+import { UploadFile, UploadTwoTone } from "@mui/icons-material";
 import { useQueryClient } from "@tanstack/react-query";
 
 const FolderUploader = () => {
@@ -62,25 +57,41 @@ const FolderUploader = () => {
 
   return (
     <div>
-      <Button
-        id="upload-proxy"
-        variant="contained"
-        // className={style.uploaderLabel}
-        // htmlFor="folder-upload"
-        endIcon={<UploadFile />}
-        onClick={(e) => {
-          document.getElementById("folder-upload")?.click();
-        }}
-      >
-        Folder upload
-      </Button>
+      <div style={{ display: "flex", gap: 20 }}>
+        <Button
+          color="info"
+          id="upload-proxy"
+          variant="contained"
+          startIcon={<UploadTwoTone />}
+          onClick={(e) => {
+            document.getElementById("folder-upload")?.click();
+          }}
+        >
+          Folder upload
+        </Button>
+        <Button
+          id="upload-proxy-2"
+          variant="contained"
+          startIcon={<UploadFile />}
+          onClick={(e) => {
+            document.getElementById("file-upload")?.click();
+          }}
+        >
+          File upload
+        </Button>
+      </div>
       <input
         id="folder-upload"
         type="file"
-        // @ts-expect-error: folders are good
-        // eslint-disable-next-line react/no-unknown-property
         directory=""
         webkitdirectory=""
+        onChange={handleChange}
+        ref={ref}
+        style={{ visibility: "hidden" }}
+      />
+      <input
+        id="file-upload"
+        type="file"
         onChange={handleChange}
         ref={ref}
         style={{ visibility: "hidden" }}
