@@ -3,7 +3,7 @@ FROM node:18.20.4-slim AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --force
 
 
 COPY ./ ./
@@ -15,4 +15,6 @@ FROM nginx:latest
 COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+COPY nginx.conf.template ./
+
+CMD ["/bin/bash", "-c" , "envsubst '$BACKEND_DOMAIN $BACKEND_PORT' < ./nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"]

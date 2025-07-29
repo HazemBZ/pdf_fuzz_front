@@ -1,4 +1,5 @@
 export const projectName = "PDF FUZZ";
-export const targetServer = process.env.REACT_APP_BACKEND.replace(":", "")
-  ? process.env.REACT_APP_BACKEND
-  : "localhost:8000";
+
+// env var expansion with .env files is failing -> just move to vite later
+const targetGateway = "localhost:7000";
+export const targetServer = targetGateway;

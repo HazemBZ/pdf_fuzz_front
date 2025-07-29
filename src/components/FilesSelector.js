@@ -1,7 +1,7 @@
 import { Button, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 import { useState } from "react";
 
-const FilesSelector = ({ metas, handleItemSelection }) => {
+const FilesSelector = ({ metas = [], handleItemSelection }) => {
   const [checked, setChecked] = useState(Array(metas.length).fill(true));
 
   const handleChange = (id, name) => {
