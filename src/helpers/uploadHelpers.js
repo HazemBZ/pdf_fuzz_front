@@ -15,7 +15,7 @@ const markUploadComplete = async (upload_id, filename) => {
   completionForm.append("upload_id", upload_id);
   completionForm.append("realname", filename);
   // TODO: Protect uploads using project and user ids
-  const url = `http://${targetServer}/chunkedUpload/complete`;
+  const url = `http://${targetServer}/api/chunkedUpload/complete`;
   const res = await axios.post(url, completionForm);
   return res;
 };
@@ -25,7 +25,7 @@ const markUploadComplete = async (upload_id, filename) => {
  */
 const sendSignleChunk = async (chunk, upload_id, hash, headers) => {
   const FORM_FILE_ALIAS = "my_file";
-  const url = `http://${targetServer}/chunkedUpload/start`;
+  const url = `http://${targetServer}/api/chunkedUpload/start`;
   const formData = new FormData();
   formData.append(FORM_FILE_ALIAS, chunk);
   if (upload_id) formData.append("upload_id", upload_id);
@@ -156,7 +156,7 @@ export const filterNonUploaded = async (fileList) => {
     fileHashes.push(hash);
   }
 
-  const url = `http://${targetServer}/chunkedUpload/check_uploads`;
+  const url = `http://${targetServer}/api/chunkedUpload/check_uploads`;
   const checkers = await axios
     .post(url, {
       hashes: fileHashes,
