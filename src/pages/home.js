@@ -18,6 +18,9 @@ function Home() {
   const [highlighted, setHighlighted] = useState(false);
   const [highlightedItem, setHighlightedItem] = useState({});
 
+
+  // TODO: GET PDF FILENAME FROM HERE then use it to read file
+  
   const {
     data: metas,
     isLoding,

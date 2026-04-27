@@ -1,4 +1,4 @@
-FROM node:18.20.4-slim AS build
+FROM docker.io/library/node:18.20.4-slim AS build
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY ./ ./
 RUN npm run build
 
 
-FROM nginx:latest
+FROM docker.io/library/nginx:latest
 
 COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
